@@ -168,19 +168,6 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('script') ?>
-<!-- DataTables  & Plugins -->
-<script src="/template/adminLTE/plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-<script src="/template/adminLTE/plugins/jszip/jszip.min.js"></script>
-<script src="/template/adminLTE/plugins/pdfmake/pdfmake.min.js"></script>
-<script src="/template/adminLTE/plugins/pdfmake/vfs_fonts.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.print.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 <!-- Select2 -->
 <script src="/template/adminLTE/plugins/select2/js/select2.full.min.js"></script>
 <script>
@@ -207,17 +194,6 @@
       fetchData((data) => {
         processData(data);
         generateData();
-        $table.DataTable({
-          "responsive": true, "lengthChange": false, "autoWidth": false,
-          // "buttons": [
-          //   "copy",
-          //   "csv",
-          //   "excel",
-          //   "pdf",
-          //   "print",
-          //   // "colvis",
-          // ]
-        });// }).buttons().container().appendTo('#table-data_wrapper .col-md-6:eq(0)');
       });
 
       fetchCategory(data => processCategory( data));
@@ -262,6 +238,9 @@
               kredit: $(this).find('.kredit-num').val(),
             });
           });
+
+          const currentID = parseInt($(this).attr('data-id'));
+
           var url = '';
           var formData = new FormData();
           formData.append('tanggal', $tanggal.val());
@@ -271,8 +250,8 @@
           formData.append('jumlah', $jumlah.siblings('.jumlah-num').val());
           formData.append('accounting', JSON.stringify(dataAccounting));
 
-          if (btnSimpan.data('id') > 0) {
-            url = `<?= url_to('accounting.transaksi.penyesuaian') ?>/update/${btnSimpan.data('id')}`;
+          if (currentID > 0) {
+            url = `<?= url_to('accounting.transaksi.penyesuaian') ?>/update/${currentID}`;
             formData.append('_method', 'PUT');
           } else {
             url = `<?= url_to('accounting.transaksi.penyesuaian.store') ?>`;
@@ -546,7 +525,7 @@
 
     function updateSimpanButtonState() {
         var unsavedRows = $tableForm.children('tr').filter('[data-status=""], [data-status="edit"]');
-        if ($tableForm.children('tr[data-status=save]').length > 0 && unsavedRows.length === 0 && $tanggal.val() !== '' && $nilai.val() !== '' && $waktu.val() !== '' && $jumlah.val() !== '') {
+        if ($tableForm.children('tr[data-status=save]').length > 0 && unsavedRows.length === 0 && $tanggal.val() !== '' && $deskripsi.val() !== '') {
             btnSimpan.removeAttr('disabled');
         } else {
             btnSimpan.attr('disabled', 'disabled');

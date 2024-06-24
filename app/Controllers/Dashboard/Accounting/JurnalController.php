@@ -65,7 +65,7 @@ class JurnalController extends BaseController
         // check bila ada kode akun kas
         $found = false;
         foreach ($detail as $item) {
-            if ((int)$item['category3_kode'] == 1110) {
+            if ((int)$item['category3_kode'] == $this->transaksi->get_kode_akun3_like('kas')) {
                 $found = true;
                 break;
             }
@@ -81,7 +81,7 @@ class JurnalController extends BaseController
             ]);
 
             // If there is an account code of '1110'
-            if ($found && (int)$d['category3_kode'] != 1110) {
+            if ($found && (int)$d['category3_kode'] != $this->transaksi->get_kode_akun3_like('kas')) {
                 // Insert all account codes except '1110' to arus_kas
                 $this->transaksi->insert_arus_kas($this->request->getVar('tanggal'), $d['category3_kode'], $d['kredit'], $d['debit'], ($this->request->getVar('deskripsi') ?? ''));
             }
@@ -160,7 +160,7 @@ class JurnalController extends BaseController
             // check bila ada kode akun kas
             $found = false;
             foreach ($detail as $i) {
-                if ((int)$i['category3_kode'] == 1110) {
+                if ((int)$i['category3_kode'] == $this->transaksi->get_kode_akun3_like('kas')) {
                     $found = true;
                     break;
                 }
@@ -170,13 +170,13 @@ class JurnalController extends BaseController
             if ($found) {
                 $oldFound = $this->db->table('accounting_detail')->where('accounting_id', $ID)->get()->getResultArray();
                 foreach ($oldFound as $of) {
-                    if ($of['category3_kode'] != 1110) {
-                        $this->db->table('arus_kas')->where('tanggal', ($existingData['tanggal'] !== $this->request->getVar('tanggal') ? $this->request->getVar('tanggal') : $existingData['tanggal']))->where('debit', $of['kredit'])->where('kredit', $of['debit'])->delete();
+                    if ($of['category3_kode'] != $this->transaksi->get_kode_akun3_like('kas')) {
+                        $this->db->table('arus_kas')->where('tanggal', $existingData['tanggal'])->where('debit', $of['kredit'])->where('kredit', $of['debit'])->delete();
                     }
                 }
             }
             $this->db->table('accounting_detail')->where('accounting_id', $ID)->delete();
-
+    
             foreach ($detail as $d) {
                 $this->db->table('accounting_detail')->insert([
                     'accounting_id' => $ID,
@@ -184,12 +184,12 @@ class JurnalController extends BaseController
                     'debit' => (int)$d['debit'],
                     'kredit' => (int)$d['kredit'],
                 ]);
-
+    
                 // jika terdapat kode akun kas
                 if ($found) {
-                    if ($d['category3_kode'] != 1110) {
-                        //    masukkan semua data kode akun selain kas
-                        $this->transaksi->insert_arus_kas(($existingData['tanggal'] !== $this->request->getVar('tanggal') ? $this->request->getVar('tanggal') : $existingData['tanggal']), $d['category3_kode'], $d['kredit'], $d['debit'], ($dataUpdate['deskripsi'] ?? $existingData['bukti']));
+                    if ($d['category3_kode'] != $this->transaksi->get_kode_akun3_like('kas')) {
+                        // masukkan semua data kode akun selain kas
+                        $this->transaksi->insert_arus_kas(($dataUpdate['tanggal'] ?? $existingData['tanggal']), $d['category3_kode'], $d['kredit'], $d['debit'], ($dataUpdate['deskripsi'] ?? $existingData['deskripsi']));
                     }
                 }
             }
@@ -198,6 +198,7 @@ class JurnalController extends BaseController
         // Return success message
         return $this->response->setJSON(['bg' => 'bg-success', 'message' => 'Data perubahan akuntansi telah disimpan']);
     }
+    
 
     public function delete($ID)
     {

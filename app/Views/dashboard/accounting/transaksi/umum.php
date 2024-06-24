@@ -135,19 +135,6 @@
 <?= $this->endSection(); ?>
 
 <?= $this->section('script') ?>
-<!-- DataTables  & Plugins -->
-<script src="/template/adminLTE/plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-<script src="/template/adminLTE/plugins/jszip/jszip.min.js"></script>
-<script src="/template/adminLTE/plugins/pdfmake/pdfmake.min.js"></script>
-<script src="/template/adminLTE/plugins/pdfmake/vfs_fonts.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.print.min.js"></script>
-<script src="/template/adminLTE/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 <!-- Select2 -->
 <script src="/template/adminLTE/plugins/select2/js/select2.full.min.js"></script>
 <script>
@@ -172,17 +159,6 @@
       fetchData((data) => {
         processData(data);
         generateData();
-        $table.DataTable({
-          "responsive": true, "lengthChange": false, "autoWidth": false,
-          // "buttons": [
-          //   "copy",
-          //   "csv",
-          //   "excel",
-          //   "pdf",
-          //   "print",
-          //   // "colvis",
-          // ]
-        });// }).buttons().container().appendTo('#table-data_wrapper .col-md-6:eq(0)');
       });
       fetchCategory(data => processCategory(data));
         
@@ -206,12 +182,12 @@
           toggleHide();
         });
 
-        btnSimpan.on('click', () => {
+        btnSimpan.on('click', function () {
           var dataForm = $tableForm.find('tr');
           var saveState = dataForm.toArray().every(tr => $(tr).attr('data-status') == 'save');
           if (!saveState) {
               $(this).attr('disabled', 'disabled');
-              makeToast('bg-danger','siapkan data terlebih dahulu!!!');
+              makeToast('bg-danger', 'Siapkan data terlebih dahulu!!!');
               return;
           }
 
@@ -223,6 +199,9 @@
               kredit: $(this).find('.kredit-num').val(),
             });
           });
+          
+          const currentID = parseInt($(this).attr('data-id'));
+
           var url = '';
           var formData = new FormData();
           formData.append('tanggal', $tanggal.val());
@@ -230,8 +209,8 @@
           formData.append('deskripsi', $deskripsi.val());
           formData.append('accounting', JSON.stringify(dataAccounting));
 
-          if (parseInt(btnSimpan.data('id')) > 0) {
-            url = `<?= url_to('accounting.transaksi.umum') ?>/update/${btnSimpan.data('id')}`;
+          if ( currentID > 0) {
+            url = `<?= url_to('accounting.transaksi.umum') ?>/update/${currentID}`;
             formData.append('_method', 'PUT');
           } else {
             url = `<?= url_to('accounting.transaksi.umum.store') ?>`;
@@ -252,24 +231,23 @@
                         processData(data);
                         generateData();
                       });
-                      
+
                       var now = new Date();
                       var day = ("0" + now.getDate()).slice(-2);
                       var month = ("0" + (now.getMonth() + 1)).slice(-2);
-                      var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+                      var today = now.getFullYear() + "-" + (month) + "-" + (day);
                       $tanggal.val(today);
                       $kwitansi.val('');
                       $deskripsi.val('');
                       $tableForm.empty();
                       btnBatal.click();
-                      btnSimpan.attr('data-id', 0);
+                      btnSimpan.attr('data-id', 0); // Reset the data-id to 0
                   }
               },
               error: function(xhr, status, error) {
                   makeToast('bg-danger', xhr.responseText);
               }
           });
-          
         });//end btnSimpan onClick
         
         $tableData.on('click', 'button.btn-edit, button.btn-delete', function () {
