@@ -202,6 +202,92 @@
   </div>
   <!-- /.content-wrapper -->
 
+  <div class="modal fade" id="modal-customer">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="modal-title"></h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                            <label for="u-name">Nama<span class="text-danger">*</span></label>
+                            <input type="text" id="u-name" name="name" class="form-control" data-value="" placeholder="like: Abimanyu">
+                            <div class="invalid-feedback d-none">
+                                Nama harus unique(tidak boleh sama dengan yang lain).
+                            </div>
+                            </div>
+                            <div class="form-group">
+                            <label for="u-alamat">Alamat</label>
+                            <input type="text" id="u-alamat" name="alamat" placeholder="Alamat" class="form-control" data-value="">
+                            </div>
+                            <div class="form-group">
+                            <label for="u-toko">Nama toko/PT<span class="text-danger">*</span></label>
+                            <input type="text" id="u-toko" name="toko" class="form-control" data-value="" placeholder="like: UD Jaya Abadi">
+                            <div class="invalid-feedback d-none">
+                                Nama toko harus di isi.
+                            </div>
+                            </div>
+                            <div class="form-group">
+                            <label for="u-bank">Bank</label>
+                            <input type="text" name="bank" id="u-bank" class="form-control" placeholder="like: Bank Central Asia (BCA)">
+                            <div class="invalid-feedback d-none">
+                                Nama bank harus di isi.
+                            </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                            <label for="u-email">Email</label>
+                            <input type="email" id="u-email" name="email" class="form-control" data-value="" placeholder="like: abimanyu@gmail.com">
+                            <div class="invalid-feedback d-none">
+                                invalid email.
+                            </div>
+                            </div>
+                            <div class="form-group">
+                            <label for="u-phone">no HP/Whatsapp<span class="text-danger">*</span></label>
+                            <input type="text" id="u-phone" name="phone" class="form-control" data-value="" placeholder="like:+62 857 3689 7503,+62-857-3689-7503,(+62)857 3689 7503,0857-3689-7503,(+62)85736897503,085736897503,+62 85 736 897 503,085 736 897 503,(+62)85 736897503,085-736-897-503,">
+                            <div class="invalid-feedback d-none">
+                                invalid no Whatsapp.
+                            </div>
+                            </div>
+                            <div class="form-group">
+                            <label for="u-alamat-toko">Alamat toko/PT<span class="text-danger">*</span></label>
+                            <input type="text" id="u-alamat-toko" name="alamat_toko" class="form-control" data-value="" placeholder="Alamat Toko/PT">
+                            <div class="invalid-feedback d-none">
+                                Alamat toko harus di isi.
+                            </div>
+                            </div>
+                            <div class="form-group">
+                            <label for="u-no-rekening">No Rekening</label>
+                            <input type="text" id="u-no-rekening" name="no_rekening" class="form-control" data-value="" placeholder="No Rekening">
+                            <div class="invalid-feedback d-none">
+                                No rekening harus di isi.
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" id="btn-create-customer">Simpan</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal show -->
+
+
 <?= $this->endSection(); ?>
 
 <?= $this->section('script') ?>
@@ -218,6 +304,17 @@
         const $dateFaktur = $('#tanggal-faktur');// inp tanggal faktur
         const $customer = $('#customer-id')// inp select customer
         const $pembayaran = $('#pembayaran')// inp select pembayaran
+
+        const $modalShow = new bootstrap.Modal(document.getElementById('modal-customer'), {});
+        const inpName = $('#u-name');
+        const inpEmail = $('#u-email');
+        const inpPhone = $('#u-phone');
+        const inpAlamat = $('#u-alamat');
+        const inpToko = $('#u-toko');
+        const inpAlamatToko = $('#u-alamat-toko');
+        const inpBank = $('#u-bank');
+        const inpNoRekening = $('#u-no-rekening');
+        const btnSimpanModal = $('#btn-create-customer');
 
         const $subtotal = $('#subtotal');// div subtotal
         const $subtotalNum = $('#subtotal-num');// inp hidden subtotal berupa angka saja
@@ -236,7 +333,28 @@
             fetchDataCustomer(e => {
                 processDataCustomer(e);
                 generateSelectCustomer();
-                $customer.select2();
+                $customer.select2({
+                    placeholder: '-- Pilih Customer --',
+                    tags: true,
+                    createTag: function (params) {
+                        var term = $.trim(params.term);
+                        if (term === "") {
+                        return null;
+                        }
+                        return {
+                        id: term,
+                        text: term,
+                        newTag: true
+                        };
+                    }
+                }).on('select2:select', function (e) {
+                    // Check if the selected option is a new tag
+                    if (e.params.data.newTag) {
+                        inpName.val(e.params.data.text);
+                        btnSimpanModal.prop('disabled', true);
+                        $modalShow.show();
+                    }
+                });
             });// masukkan data customer pada tempatnya
 
             fetchDataBarang(e => {
@@ -435,7 +553,108 @@
                 });
             });// end $btnInvoice
 
+            $('#modal-customer').on('hidden.bs.modal', function(){deleteFormCustomer();}); // if modalShow was closed
+
+            $('#modal-customer').on('input', '.form-control', function(){// $modalShow onInput
+                // validation
+                const emailPattern = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                const phoneNumberPattern = /^(?:\+62|0)(?:\s*\(?\d{2,3}\)?\s*|\-?\d\s*){9,15}$/;
+
+                let inputFocus = $(this);
+                let typeInput = inputFocus.attr('type');
+                let nameInput = inputFocus.attr('name'); 
+                let feedbackDiv = inputFocus.parent().find('.invalid-feedback');    
+                
+                switch (nameInput) {
+                    case 'email':
+                        let isEmail = emailPattern.test(inputFocus.val());
+        
+                        inputFocus.toggleClass('is-invalid', !isEmail);
+                        feedbackDiv.toggleClass('d-none', isEmail);
+                        feedbackDiv.html('Invalid email.');
+                        break;
+                    case 'phone':
+                        let isNumberPhone = phoneNumberPattern.test(inputFocus.val());
+            
+                        inputFocus.toggleClass('is-invalid', !isNumberPhone);
+                        feedbackDiv.toggleClass('d-none', isNumberPhone);
+                        feedbackDiv.html('invalid no Whatsapp.(Wajib di isi)');
+                        break;
+                    default:
+                        inputFocus.toggleClass('is-invalid', true);
+                        feedbackDiv.toggleClass('d-none', false);
+                        feedbackDiv.html(`${nameInput} wajib di isi.`);
+                        if (inputFocus.val() !== null) {
+                            inputFocus.toggleClass('is-invalid', false);
+                            feedbackDiv.toggleClass('d-none', true);
+                            feedbackDiv.html(``);
+                        }
+                        break;
+                }
+
+                btnSimpanModal.prop('disabled', !(
+                    inpName.val() && !inpName.hasClass('is-invalid') &&
+                    inpPhone.val() && !inpPhone.hasClass('is-invalid') &&
+                    inpToko.val() && !inpToko.hasClass('is-invalid') &&
+                    inpAlamatToko.val() && !inpAlamatToko.hasClass('is-invalid')
+                ));
+            }); // end $modalShow onInput
+
+            btnSimpanModal.on('click', function() {
+                let formData = new FormData();
+                let urlSimpan = '<?= url_to('preference.customer.store') ?>';
+
+                formData.append('nama', inpName.val());
+                formData.append('email', inpEmail.val());
+                formData.append('phone', inpPhone.val());
+                formData.append('alamat', inpAlamat.val());
+                formData.append('nama_toko', inpToko.val());
+                formData.append('alamat_toko', inpAlamatToko.val());
+                formData.append('bank', inpBank.val());
+                formData.append('no_rekening', inpNoRekening.val());
+
+                $.ajax({
+                    url: urlSimpan,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        makeToast(response.bg, response.message);
+                        if (response.bg === 'bg-success') {
+                            fetchDataCustomer(function(e) {
+                                processDataCustomer(e);
+                                generateSelectCustomer();
+
+                                let selectedData = jsonDataCustomer.find(e => e.name === inpName.val());
+                                $('#modal-customer').find('button.close').trigger('click');
+                                $customer.val(selectedData.id).trigger('change');
+
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        makeToast('bg-danger', `Error: ${error}`);
+                    }
+                }); 
+            }); // end btnSimpanModal
+
         });// end document ready
+
+        function deleteFormCustomer() {
+            const data = inpName.val();
+            const target = $customer.find(`option[value='${data}']`); // Corrected here
+            target.remove(); // target self delete
+            $customer.val('').trigger('change');
+            inpName.val('');
+            inpEmail.val('');
+            inpPhone.val('');
+            inpAlamat.val('');
+            inpToko.val('');
+            inpAlamatToko.val('');
+            inpBank.val('');
+            inpNoRekening.val('');
+        }
 
         function fetchDataBarang(callback) {
             $.ajax({

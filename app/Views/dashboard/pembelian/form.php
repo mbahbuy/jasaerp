@@ -348,6 +348,7 @@
         const $supplier = $('#suppliers-id')// inp select supplier
         const $kwitansi = $('#kwitansi')// inp select kwitansi
         const $bukti = $('#bukti')// inp foto bukti
+        
         const $modalShow = new bootstrap.Modal(document.getElementById('modal-supplier'), {});
         const inpName = $('#u-name');
         const inpEmail = $('#u-email');
